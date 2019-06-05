@@ -76,9 +76,9 @@ class DecisionTreeRegressor:
     
     
     def split_data_set(self, X, y, feature, value):
-        left_index = np.nonzero(X[:, feature] > value)[0]
-        right_index = np.nonzero(X[:, feature] < value)[0]
-        return X[left_index, :], y[left_index, :], X[right_index, :], y[right_index, :]
+        left_index = np.nonzero(X.iloc[:, feature] > value)[0]
+        right_index = np.nonzero(X.iloc[:, feature] < value)[0]
+        return X.iloc[left_index, :], y.iloc[left_index, :], X.iloc[right_index, :], y.iloc[right_index, :]
     
     
     def select_best_feature(self, X, y):
@@ -98,17 +98,16 @@ class DecisionTreeRegressor:
         best_feature = 0
         best_value = 0
         
-        MSE = self.mse_data(X, y)
+        MSE = self.mse_data(y)
 
         for i in range(self.max_features_num):
             features_index.append(np.random.randint(n_features))
         
         for feature in features_index:
-            for value in set(X[:, feature]):
+            for value in set(X.iloc[:, feature]):
                 left_X, left_y, right_X, right_y = self.split_data_set(X, y, feature, value)
 
-                new_MSE = self.MSE_data(left_y) + self.MSE_data(right_y)
-                
+                new_MSE = self.mse_data(left_y)[0] + self.mse_data(right_y)[0]
                 if best_MSE > new_MSE:
                     best_feature = feature
                     best_value = value

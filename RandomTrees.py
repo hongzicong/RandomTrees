@@ -14,7 +14,7 @@ class RandomTreesRegressor:
         self.n_trees = n_trees
         self.n_processes = n_processes
         self.max_features_num = max_features_num
-        self.max_depth
+        self.max_depth = max_depth
     
     
     def fit(self, X, y):
@@ -31,7 +31,7 @@ class RandomTreesRegressor:
     
     
     def _build_tree(self, X, y):
-        return DecisionTreeRegressor(self.max_features_num, self.max_depth).build(X, y, self.max_depth)
+        return DecisionTreeRegressor(self.max_features_num, self.max_depth).build(X, y)
     
     
     def predict(self, X):
