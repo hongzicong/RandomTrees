@@ -13,8 +13,13 @@ class DecisionTreeRegressor:
         self.max_features_num = max_features_num
         self.max_depth = max_depth
         self.min_impurity_split = min_impurity_split
+        
+        
+    def build(self, X, y):
+        self.tree = self.__build(X, y, self.max_depth)
+        
     
-    def build(self, X, y, height):
+    def __build(self, X, y, height):
         '''
         Parameters
         ----------
@@ -41,6 +46,25 @@ class DecisionTreeRegressor:
         tree['right'] = self.build(right_X, right_y, height)
         tree['left'] = self.build(left_X, left_y, height)
         return tree
+
+    
+    def predict(self, X):
+        return self.__predict(self.tree, X)
+
+
+    def __predict(self, tree, X):
+        if not isinstance(tree, dict):
+            return float(tree)
+        if X[tree['bestFeature']] > tree['bestVal']:
+            if type(tree['left']) == 'float':
+                return tree['left']
+            else:
+                return self.__predict(tree['left'], X)
+        else:
+            if type(tree['right'])=='float':
+                return tree['right']
+            else:
+                return self.__predict(tree['right'], X)
 
     
     def mse_data(self, label):

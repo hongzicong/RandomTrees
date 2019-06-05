@@ -49,8 +49,9 @@ class RandomTreesRegressor:
         
         y = np.zeros((X.shape[0]), dtype=np.float64)
         
+        for tree in self.trees:
+            y += tree.predict(X)
         
-        
-        y /= len(self.n_estimators)
+        y /= len(self.n_trees)
         
         return y
