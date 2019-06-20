@@ -10,11 +10,12 @@ from DecisionTree import DecisionTreeRegressor
 
 class RandomTreesRegressor:
     
-    def __init__(self, n_trees, n_processes, max_features_num, max_depth):
+    def __init__(self, n_trees, n_processes, max_features_num, max_depth, min_samples_split=2):
         self.n_trees = n_trees
         self.n_processes = n_processes
         self.max_features_num = max_features_num
         self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
     
     
     def fit(self, X, y):
@@ -31,7 +32,9 @@ class RandomTreesRegressor:
     
     
     def _build_tree(self, X, y):
-        return DecisionTreeRegressor(self.max_features_num, self.max_depth).build(X, y)
+        tree = DecisionTreeRegressor(self.max_features_num, self.max_depth, self.min_samples_split)
+        tree.build(X, y)
+        return tree
     
     
     def predict(self, X):
@@ -49,9 +52,9 @@ class RandomTreesRegressor:
         
         y = np.zeros((X.shape[0]), dtype=np.float64)
         
-        for tree in self.trees:
+        for tree in self.trees_:
             y += tree.predict(X)
         
-        y /= len(self.n_trees)
+        y /= self.n_trees
         
         return y

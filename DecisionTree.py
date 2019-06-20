@@ -9,10 +9,11 @@ import numpy as np
 
 class DecisionTreeRegressor:
     
-    def __init__(self, max_features_num, max_depth, min_impurity_split=1e-7):
+    def __init__(self, max_features_num, max_depth, min_samples_split=2, min_impurity_split=1e-7):
         self.max_features_num = max_features_num
         self.max_depth = max_depth
         self.min_impurity_split = min_impurity_split
+        self.min_samples_split = min_samples_split
         
         
     def build(self, X, y):
@@ -36,39 +37,43 @@ class DecisionTreeRegressor:
         tree = {}
         
         height -= 1
-        if height < 0:
+        if height < 0 or X.shape[0] < self.min_samples_split:
             return self.avg_data(y)
         
         tree['bestFeature'] = bestfeature
         tree['bestVal'] = bestValue
         
         left_X, left_y, right_X, right_y = self.split_data_set(X, y, bestfeature, bestValue)
-        tree['right'] = self.build(right_X, right_y, height)
-        tree['left'] = self.build(left_X, left_y, height)
+        tree['right'] = self.__build(right_X, right_y, height)
+        tree['left'] = self.__build(left_X, left_y, height)
         return tree
 
     
     def predict(self, X):
-        return self.__predict(self.tree, X)
+        y = [0] * X.shape[0]
+        for i in range(X.shape[0]):
+            y[i] = self.__predict(self.tree, X.iloc[i, :])
+        return y
 
 
-    def __predict(self, tree, X):
+    def __predict(self, tree, data):
         if not isinstance(tree, dict):
             return float(tree)
-        if X[tree['bestFeature']] > tree['bestVal']:
+        
+        if data[tree['bestFeature']] > tree['bestVal']:
             if type(tree['left']) == 'float':
                 return tree['left']
             else:
-                return self.__predict(tree['left'], X)
+                return self.__predict(tree['left'], data)
         else:
             if type(tree['right'])=='float':
                 return tree['right']
             else:
-                return self.__predict(tree['right'], X)
+                return self.__predict(tree['right'], data)
 
     
     def mse_data(self, label):
-        return np.var(label) * np.shape(label)[0]
+        return (np.var(label) * np.shape(label)[0]).item()
     
     
     def avg_data(self, label):
@@ -107,7 +112,7 @@ class DecisionTreeRegressor:
             for value in set(X.iloc[:, feature]):
                 left_X, left_y, right_X, right_y = self.split_data_set(X, y, feature, value)
 
-                new_MSE = self.mse_data(left_y)[0] + self.mse_data(right_y)[0]
+                new_MSE = self.mse_data(left_y) + self.mse_data(right_y)
                 if best_MSE > new_MSE:
                     best_feature = feature
                     best_value = value
