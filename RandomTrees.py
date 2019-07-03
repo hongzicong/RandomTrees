@@ -7,6 +7,7 @@ Created on Fri May 31 10:12:16 2019
 
 import numpy as np
 from DecisionTree import DecisionTreeRegressor
+from sklearn.externals.joblib import Parallel, delayed
 
 class RandomTreesRegressor:
     
@@ -28,13 +29,12 @@ class RandomTreesRegressor:
         y : array of shape = [n_samples]
             The label of X
         '''
-        self.trees_ = [self._build_tree(X, y) for i in range(self.n_trees)]
-    
-    
-    def _build_tree(self, X, y):
-        tree = DecisionTreeRegressor(self.max_features_num, self.max_depth, self.min_samples_split)
-        tree.build(X, y)
-        return tree
+        self.trees_ = [DecisionTreeRegressor(self.max_features_num, 
+                                             self.max_depth, 
+                                             self.min_samples_split) for i in range(self.n_trees)]
+        self.trees_ = Parallel(n_jobs=self.n_processes)(
+                delayed(_parallel_build)(tree, X, y)
+                for i, tree in enumerate(self.trees_))
     
     
     def predict(self, X):
@@ -58,3 +58,7 @@ class RandomTreesRegressor:
         y /= self.n_trees
         
         return y
+
+def _parallel_build(tree, X, y):
+    tree.build(X, y)
+    return tree

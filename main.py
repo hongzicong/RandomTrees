@@ -44,7 +44,7 @@ y = label_1[0:1000]
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state = RANDOM_SEED)
 
-model = RandomTreesRegressor(n_trees=5, n_processes=-1, max_features_num=10, max_depth=5, min_samples_split=4)
+model = RandomTreesRegressor(n_trees=2, n_processes=2, max_features_num=10, max_depth=5, min_samples_split=4)
 model.fit(x_train, y_train)
 
 y_pred = model.predict(x_test)
